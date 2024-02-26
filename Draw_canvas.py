@@ -205,13 +205,13 @@ def cut(A, B, C, D):
 def distance(A, B):
     return math.sqrt((((A[0]-B[0]))**2 + ((A[1]-B[1]))**2))
 
-def draw_graph(graph):
+def draw_graph(graph, type):
     global new_poly
     for i in range(len(graph)):
         for [u, w] in graph[i]:
             point1 = new_poly[i]
             point2 = new_poly[u]
-            canvas.create_line(point1, point2, fill="pink", tag="visibility")
+            canvas.create_line(point1, point2, fill="pink", tag=type)
 
 def gen_base_visibility():
     global edges, poly, base_visi
@@ -280,7 +280,8 @@ def gen_visibility():
             visi_graph[23+i*22].append((len(new_poly)-2*(i+1)-1, distance(new_poly[23+i*22], new_poly[len(new_poly)-2*(i+1)-1])))
             visi_graph[len(new_poly)-2*(i+1)-1].append((23+i*22, distance(new_poly[23+i*22], new_poly[len(new_poly)-2*(i+1)-1])))
     print(visi_graph[23])
-    draw_graph(visi_graph)
+    draw_graph(visi_graph, "visibility")
+    toggle_visibility()
     canvas.create_polygon(new_poly, fill="", outline="black", width=3, tags = "path")       
 
 def draw_grid():
@@ -319,6 +320,13 @@ def updateSIZE():
         poly[i][0] = poly[i][0] * SIZE
         poly[i][1] = poly[i][1] * SIZE
     updateK()
+
+def toggle_visibility():
+    global show_graph
+    if(show_graph.get()):
+        canvas.itemconfig("visibility", state='normal')
+    else:
+        canvas.itemconfig("visibility", state='hidden')
 
 def reset():
     global start, end, points_num, g, new_poly
@@ -369,6 +377,13 @@ def main():
     SIZE_entry = tk.Entry(menu_frame, textvariable=SIZE_val).pack(side = tk.LEFT, padx=PADDING, pady=PADDING, anchor="ne")
     updateSIZE_button = tk.Button(menu_frame, text="Update", command=updateSIZE).pack(side = tk.LEFT, padx=PADDING, pady=PADDING, anchor="ne")
     reset_button = tk.Button(menu_frame, text="Reset", command=reset).pack(side = tk.RIGHT, padx=PADDING, pady=PADDING, anchor="ne")
+    global show_graph
+    show_graph = tk.BooleanVar()
+    show_graph.set(False)
+    show_graph.trace_add("write", lambda *_: toggle_visibility())
+    tk.Checkbutton(menu_frame, text="Visibility graph", variable=show_graph).pack(
+        side=tk.RIGHT, padx=PADDING
+    )
     global start_coords_label
     start_coords_label = tk.Label(menu_frame, text="start = {...; ...}")
     start_coords_label.pack(side=tk.LEFT, padx=PADDING)
